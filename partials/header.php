@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../app/cart.php';
 $pageTitle = $pageTitle ?? 'Swd Shop';
 ?>
 <!doctype html>
@@ -15,7 +16,7 @@ $pageTitle = $pageTitle ?? 'Swd Shop';
         <a class="brand" href="index.php"><span class="brand-mark">S</span> swd<span>shop</span></a>
         <nav class="main-nav" aria-label="Main navigation">
             <a href="index.php">Shop</a>
-            <a class="cart-link" href="index.php#products">Cart <span class="cart-count"><?= cart_count() ?></span></a>
+            <a class="cart-link" href="cart.php">Cart <span class="cart-count"><?= cart_count() ?></span></a>
         </nav>
     </div>
 </header>

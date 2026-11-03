@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/app/bootstrap.php';
+require __DIR__ . '/app/cart.php';
 
 $slug = trim((string) ($_GET['slug'] ?? ''));
 $statement = $pdo->prepare(
@@ -33,10 +34,10 @@ if (!$product) {
 $pageTitle = (string) $product['name'];
 $cartMessage = '';
 $cartMessageType = 'success';
-if (isset($_SESSION['cart_message'])) {
-    $cartMessage = (string) $_SESSION['cart_message'];
-    $cartMessageType = (string) ($_SESSION['cart_message_type'] ?? 'success');
-    unset($_SESSION['cart_message'], $_SESSION['cart_message_type']);
+if (isset($_SESSION['cart_notice'])) {
+    $cartMessage = (string) $_SESSION['cart_notice'];
+    $cartMessageType = (string) ($_SESSION['cart_notice_type'] ?? 'success');
+    unset($_SESSION['cart_notice'], $_SESSION['cart_notice_type']);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,26 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cartMessageType = 'error';
     } else {
         $quantity = filter_var($_POST['quantity'] ?? null, FILTER_VALIDATE_INT);
-        if ($quantity === false || $quantity === null || $quantity < 1 || $quantity > (int) $product['stock']) {
+        if ($quantity === false || $quantity === null || $quantity < 1) {
             http_response_code(422);
-            $cartMessage = 'Choose a quantity between 1 and ' . (int) $product['stock'] . '.';
+            $cartMessage = 'Enter a quantity of at least 1.';
             $cartMessageType = 'error';
         } else {
-            $cart = $_SESSION['cart'] ?? [];
-            $currentQuantity = (int) ($cart[$product['id']] ?? 0);
-            $newQuantity = $currentQuantity + $quantity;
-            if ($newQuantity > (int) $product['stock']) {
-                $cartMessage = 'Your cart already has ' . $currentQuantity . ' of this item; only '
-                    . max(0, (int) $product['stock'] - $currentQuantity) . ' more are available.';
-                $cartMessageType = 'error';
-            } else {
-                $cart[$product['id']] = $newQuantity;
-                $_SESSION['cart'] = $cart;
-                $_SESSION['cart_message'] = $quantity . ' × ' . $product['name'] . ' added to your cart.';
-                $_SESSION['cart_message_type'] = 'success';
-                header('Location: product.php?slug=' . rawurlencode((string) $product['slug']));
-                exit;
+            unset($_SESSION['cart_notice']);
+            $newQuantity = cart_add((int) $product['id'], $quantity);
+            if (!isset($_SESSION['cart_notice'])) {
+                $_SESSION['cart_notice'] = $quantity . ' × ' . $product['name'] . ' added to your cart.';
+                $_SESSION['cart_notice_type'] = 'success';
             }
+            if ($newQuantity < 1) {
+                $_SESSION['cart_notice_type'] = 'error';
+            }
+            header('Location: product.php?slug=' . rawurlencode((string) $product['slug']));
+            exit;
         }
     }
 }

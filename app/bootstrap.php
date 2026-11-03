@@ -42,8 +42,3 @@ function csrf_is_valid(mixed $token): bool
         && isset($_SESSION['csrf_token'])
         && hash_equals($_SESSION['csrf_token'], $token);
 }
-
-function cart_count(): int
-{
-    return array_sum(array_map('intval', $_SESSION['cart'] ?? []));
-}
