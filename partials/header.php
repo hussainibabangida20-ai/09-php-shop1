@@ -16,6 +16,7 @@ $pageTitle = $pageTitle ?? 'Swd Shop';
         <a class="brand" href="index.php"><span class="brand-mark">S</span> swd<span>shop</span></a>
         <nav class="main-nav" aria-label="Main navigation">
             <a href="index.php">Shop</a>
+            <a href="order-lookup.php">Track order</a>
             <a class="cart-link" href="cart.php">Cart <span class="cart-count"><?= cart_count() ?></span></a>
         </nav>
     </div>
